@@ -21,7 +21,7 @@ const getTopThreeSum = (sortedLoads: number[]) => {
     return lastThree.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 }
 
-const inputFile = readFileSync("day1input.txt");
+const inputFile = readFileSync("day1/day1input.txt");
 const sortedLoads = getSortedLoads(inputFile.toString());
 
 console.log("Answer is: " + getHighestLoad(sortedLoads));

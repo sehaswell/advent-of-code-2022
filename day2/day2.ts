@@ -49,7 +49,7 @@ const getOutcomeScore = (opponent: Shape, self: Shape): number => {
     }
 }
 
-const inputString = readFileSync("day2input.txt").toString();
+const inputString = readFileSync("day2/day2input.txt").toString();
 
 const answer = inputString.split('\n')
     .map((strategyLine) => {
