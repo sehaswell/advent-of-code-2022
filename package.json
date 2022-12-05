@@ -1,0 +1,15 @@
+{
+  "devDependencies": {
+    "@types/node": "^18.11.10",
+    "typescript": "^4.9.3"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "run-script": "ts-node --script-mode",
+    "run-day1": "ts-node --script-mode .\\day1.ts"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.1"
+  }
+}
