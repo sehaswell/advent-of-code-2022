@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { compareNumbers } from "./utils/compareNumbers";
+import { compareNumbers } from "../utils/compareNumbers";
 
 const getSortedLoads = (input: string): number[] => {
     return input.split('\n\n')
