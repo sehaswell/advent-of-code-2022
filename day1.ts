@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { compareNumbers } from "./compareNumbers";
+import { compareNumbers } from "./utils/compareNumbers";
 
 const getHighestLoad = (input: string) => {
     const splitByElf = input.split('\n\n');
