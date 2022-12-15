@@ -19,6 +19,7 @@ type DirectoryMap = {
 }
 
 let directoryMap: DirectoryMap = {};
+let directorySizes: number[] = [];
 
 // turn lines into Directory Content
 const parseDir = (content: string[][], path: string) => {
@@ -71,6 +72,8 @@ const sumDirectory = (dir: DirectoryContent) => {
             0
         );
     }
+
+    directorySizes.push(sum);
     return sum;
 };
 
@@ -105,7 +108,7 @@ const buildDirectoryMap = (chunkedLines: string[][]) => {
                         break;
                 }
                 chunkedLines.shift();
-                console.log("Current path is " + currentPath.join(''));
+                // console.log("Current path is " + currentPath.join(''));
                 break;            
             case "ls":
                 // if line is an ls, accumulate next few non-command lines
@@ -117,7 +120,7 @@ const buildDirectoryMap = (chunkedLines: string[][]) => {
                 }
 
                 // add this content to map
-                console.log("Adding " + currentPath.join('') + " to map");
+                // console.log("Adding " + currentPath.join('') + " to map");
                 directoryMap[currentPath.join('')] = parseDir(lsOutput, currentPath.join(''));
                 break;            
             default:
@@ -143,9 +146,15 @@ const partOne = (input: string[]) => {
     if(directoryMap['/'] !== undefined) {
         const bigTotal = sumDirectory(directoryMap['/']);
         console.log("bigTotal: " + bigTotal);
+        return directorySizes.reduce(
+            (runningTotal, value) => {                
+                return value <= 100000 ? (runningTotal + value) : runningTotal;
+            },
+            0
+        );
+    } else {
+        return "pig";
     }
-
-    return "pig";
 };
 
 const partTwo = (input: string[]) => {
@@ -153,10 +162,10 @@ const partTwo = (input: string[]) => {
     return "a mystery";
 };
 
-const testInput: string[] = readAndSplit("day7/testInput.txt");
-console.log("Test answer 1 is " + partOne(testInput));
-console.log("Test answer 2 is " + partTwo(testInput));
+// const testInput: string[] = readAndSplit("day7/testInput.txt");
+// console.log("Test answer 1 is " + partOne(testInput));
+// console.log("Test answer 2 is " + partTwo(testInput));
 
-// const input: string[] = readAndSplit("day7/input.txt");
-// console.log("Real answer 1 is " + partOne(testInput));
-// console.log("Real answer 2 is " + partTwo(testInput));
+const input: string[] = readAndSplit("day7/input.txt");
+console.log("Real answer 1 is " + partOne(input));
+console.log("Real answer 2 is " + partTwo(input));
