@@ -1,3 +1,4 @@
+import { compareNumbers } from "../utils/compareNumbers"
 import { readAndSplit } from "../utils/fileUtils"
 
 // where content object is
@@ -20,6 +21,7 @@ type DirectoryMap = {
 
 let directoryMap: DirectoryMap = {};
 let directorySizes: number[] = [];
+let bigTotal: number;
 
 // turn lines into Directory Content
 const parseDir = (content: string[][], path: string) => {
@@ -144,8 +146,8 @@ const partOne = (input: string[]) => {
 
     // call sumDir on top level
     if(directoryMap['/'] !== undefined) {
-        const bigTotal = sumDirectory(directoryMap['/']);
-        console.log("bigTotal: " + bigTotal);
+        bigTotal = sumDirectory(directoryMap['/']);
+        // console.log("bigTotal: " + bigTotal);
         return directorySizes.reduce(
             (runningTotal, value) => {                
                 return value <= 100000 ? (runningTotal + value) : runningTotal;
@@ -157,15 +159,33 @@ const partOne = (input: string[]) => {
     }
 };
 
-const partTwo = (input: string[]) => {
+const partTwo = () => {
+    const totalCapacity = 70000000;
+    const neededSpace = 30000000;
 
-    return "a mystery";
+    const currentlyAvailable = totalCapacity - bigTotal;
+    const needToFree = neededSpace - currentlyAvailable;
+
+    const suitableDirSizes = directorySizes.filter(x => x >= needToFree);
+    // console.log(needToFree);
+    // console.log(suitableDirSizes);
+    return suitableDirSizes.sort(compareNumbers)[0];
+    // take big total from totalCapacity to get what's available
+    // take that from needed space to get what needs to be freed
+    // remove everything smaller than that from directorySizes
+    // sort
+    // return smallest
 };
 
-// const testInput: string[] = readAndSplit("day7/testInput.txt");
-// console.log("Test answer 1 is " + partOne(testInput));
-// console.log("Test answer 2 is " + partTwo(testInput));
+const testInput: string[] = readAndSplit("day7/testInput.txt");
+console.log("Test answer 1 is " + partOne(testInput));
+console.log("Test answer 2 is " + partTwo());
+
+// reset these
+directoryMap = {};
+directorySizes = [];
+bigTotal = undefined;
 
 const input: string[] = readAndSplit("day7/input.txt");
 console.log("Real answer 1 is " + partOne(input));
-console.log("Real answer 2 is " + partTwo(input));
+console.log("Real answer 2 is " + partTwo());
