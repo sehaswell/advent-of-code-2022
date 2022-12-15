@@ -43,15 +43,21 @@ const visibleFromEnd = (index: number, array: number[]): boolean => {
     return true;
 }
 
+const isOutsideTree = (x: number, y: number) => {    
+    if(
+        (x===0) ||
+        (y===0) ||
+        (x===columns.length-1) ||
+        (y===rows.length-1)
+    ) { 
+        outsideTrees++;
+        return true;
+    }
+    return false;
+}
+
 const isVisible = (x: number, y: number): boolean => {
-    if(x===0 || y===0) {
-        outsideTrees++;
-        return true;
-    }
-    if(x===columns.length-1 || y===rows.length-1) { 
-        outsideTrees++;
-        return true;
-    }
+    if(isOutsideTree(x, y)) return true;
 
     // check visibility in row from both ends
     if(visibleFromStart(x, rows[y])) {return true;}
@@ -86,13 +92,71 @@ const partOne = (input: string[]) => {
 
     // console.log("Total trees " + totalTrees);
     // console.log("Total visible trees " + visibleTrees);
-    // console.log("Outside trees: " + outsideTrees);
+    console.log("Outside trees: " + outsideTrees);
 
     return visibleTrees;
 };
 
+const scoreTowardsEnd = (index: number, array: number[]) => {
+    let score = 0;
+    for(let j = index+1; j < array.length; j++)
+    {
+        score++;
+        if(array[j] >= array[index]) {
+            // this tree blocks
+            break;
+        }
+        // console.log(array[index] + ">" +  array[j]);
+    }
+    return score;
+}
+
+const scoreTowardsStart = (index: number, array: number[]) => {
+    let score = 0;
+    for(let j = index-1; j >= 0; j--)
+    {
+        score++;
+        if( array[j] >= array[index] ) {
+            // this tree blocks
+            break;
+        }
+        // console.log(array[index] + ">" +  array[j]);
+    }
+    return score;
+}
+
+const getScenicScore = (x: number, y: number): number => {
+    if(isOutsideTree(x, y)) {return 0;}
+
+    // multiply together the four direction scores
+    const upScore = scoreTowardsStart(y, columns[x]);
+    const downScore = scoreTowardsEnd(y, columns[x]);
+    const rightScore = scoreTowardsEnd(x, rows[y]);
+    const leftScore = scoreTowardsStart(x, rows[y]);
+
+    const treeScore = upScore * downScore * leftScore * rightScore;
+    // if(treeScore > 10000) {
+    //     console.log("Tree " + x + "," + y + " has score " + treeScore);
+    //     console.log("up " + upScore);
+    //     console.log("down " + downScore);
+    //     console.log("left " + leftScore);
+    //     console.log("right " + rightScore);
+    // }
+    return treeScore;
+}
+
 const partTwo = (input: string[]) => {
-    return "the answer to part two";
+    let highScore = 0;
+    for(let x = 0; x<columns.length; x++) {
+        for(let y=0; y<rows.length; y++) {
+           const score = getScenicScore(x, y);
+           if(score > highScore) {
+              highScore = score;
+           } 
+        }
+    }
+
+    return highScore;
 };
 
 const testInput: string[] = readAndSplit("day8/testInput.txt");
