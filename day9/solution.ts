@@ -103,6 +103,33 @@ const coordinateAsString = (coord: Coordinate) => {
     return `(${coord.x},${coord.y})`
 };
 
+const updateT = (newH: Coordinate, prevT: Coordinate, direction: string) => {
+    let newT: Coordinate = prevT;
+    if(isTouching(newH, prevT)) {
+        return prevT;
+        // console.log("Touching ");
+        // console.log(positionH);
+        // console.log(positionT);
+        // console.log("---");
+    }
+
+    // console.log("Not touching ");
+    // console.log(positionH);
+    // console.log(positionT);
+    // console.log("---");
+
+    // get new position for T
+    const secondDirection = getSecondDirection(newH, prevT, direction);
+    // once we know the directions, then just use moveOne
+    // console.log("direction is " + direction);
+    // console.log("second direction is " + secondDirection);
+    newT = moveOne(prevT, direction);
+    if( secondDirection ) {
+        newT = moveOne(newT, secondDirection);
+    }
+    return newT;
+};
+
 const partOne = (input: string[]) => {
     let positionH = {x: 0, y: 0};
     let positionT = {x: 0, y: 0};
@@ -123,31 +150,9 @@ const partOne = (input: string[]) => {
             // console.log(positionT);
             // update position H for this step
             positionH = moveOne(positionH, direction);
-
-            if(isTouching(positionH, positionT)) {
-                // console.log("Touching ");
-                // console.log(positionH);
-                // console.log(positionT);
-                // console.log("---");
-            } else {
-                // console.log("Not touching ");
-                // console.log(positionH);
-                // console.log(positionT);
-                // console.log("---");
-
-                // get new position for T
-                const secondDirection = getSecondDirection(positionH, positionT, direction);
-                // once we know the directions, then just use moveOne
-                // console.log("direction is " + direction);
-                // console.log("second direction is " + secondDirection);
-                positionT = moveOne(positionT, direction);
-                if( secondDirection ) {
-                    positionT = moveOne(positionT, secondDirection);
-                }
-
-                // store new position for T
-                seenPoistionsOfT.add(coordinateAsString(positionT));
-            }
+            positionT = updateT(positionH, positionT, direction);
+            // store new position for T
+            seenPoistionsOfT.add(coordinateAsString(positionT));
             // console.log("--- End of step ---");
         }
         // console.log("--- End of instruction ---");
@@ -160,6 +165,10 @@ const partOne = (input: string[]) => {
 };
 
 const partTwo = (input: string[]) => {
+
+    // same as part 1 but go through chain of tails and only store on the last one
+
+
     return "the answer to part two";
 };
 
