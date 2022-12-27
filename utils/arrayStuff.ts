@@ -1,0 +1,1 @@
+export const sumValues = (x) => x.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
