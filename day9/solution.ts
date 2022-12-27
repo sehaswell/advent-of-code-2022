@@ -72,62 +72,60 @@ const isTouching = (h: Coordinate, t: Coordinate): boolean => {
     return false;
 }
 
-const getSecondDirection = (h: Coordinate, t: Coordinate, direction: string): string => {
-    if(h.x === t.x || h.y === t.y) {
-        // console.log(h);
-        // console.log(t);
-        // console.log("Same in one axis ");
-        return undefined;
-    }
-    
-    // we know one direction so we only need to check the other axis
-    switch(direction) {
-        case "R":
-        case "L":
-            // figure out if t needs to go up or down
-            if(h.y >= t.y) { return "U"; }
-            return "D";
-        case "U":
-        case "D":
-            // figure out if t needs to go left or right
-            if(h.x >= t.x) { return "R"; }
-            return "L";
-        default:
-            console.log("Unrecognised direction: " + direction);
-            break;
-    }
-    console.log("Shouldn't get here");
-}
-
 const coordinateAsString = (coord: Coordinate) => {
     return `(${coord.x},${coord.y})`
 };
 
-const updateT = (newH: Coordinate, prevT: Coordinate, direction: string) => {
-    let newT: Coordinate = prevT;
-    if(isTouching(newH, prevT)) {
-        return prevT;
-        // console.log("Touching ");
-        // console.log(positionH);
-        // console.log(positionT);
-        // console.log("---");
+const shouldMoveInDirection = (h: Coordinate, t: Coordinate, direction: string) => {
+    if(h.y === t.y && h.x === t.x) { return false; }
+
+    switch(direction) {
+        case "U":
+            if( h.y === t.y ) {return false;}
+            if( h.y < t.y ) {return false;}
+            break;
+        case "D":
+            if( h.y === t.y ) {return false;}
+            if( h.y > t.y ) {return false;}
+            break;
+        case "R":
+            if( h.x === t.x ) {return false;}
+            if( h.x < t.x ) {return false;}
+            break;
+        case "L":
+            if( h.x === t.x ) {return false;}
+            if( h.x > t.x ) {return false;}
+            break;
+        default:
+            console.log("Unrecognised direction " + direction);
+            return false;
     }
 
-    // console.log("Not touching ");
-    // console.log(positionH);
-    // console.log(positionT);
-    // console.log("---");
+    return true;
+};
+
+const updateT = (newH: Coordinate, prevT: Coordinate, directions: string[]): {newT: Coordinate, directionsMoved: string[]} => {
+    let newT: Coordinate = prevT;
+    if(isTouching(newH, prevT) || directions.length === 0) {
+        return {newT: prevT, directionsMoved: []};
+    }
 
     // get new position for T
-    const secondDirection = getSecondDirection(newH, prevT, direction);
-    // once we know the directions, then just use moveOne
-    // console.log("direction is " + direction);
-    // console.log("second direction is " + secondDirection);
-    newT = moveOne(prevT, direction);
-    if( secondDirection ) {
-        newT = moveOne(newT, secondDirection);
-    }
-    return newT;
+    // do we necessarily want to move the same way the other one did? Probably? NO
+
+    // TODO: determine directions more cleverly
+
+    //["U", "D", "L", "R"].filter(x => shouldMoveInDirection(newH, prevT, x));
+    const xMove = shouldMoveInDirection(newH, prevT, "R") ? "R" : (shouldMoveInDirection(newH, prevT, "L") ? "L" : undefined);
+    const yMove = shouldMoveInDirection(newH, prevT, "U") ? "U" : (shouldMoveInDirection(newH, prevT, "D") ? "D" : undefined);
+
+    if( xMove ) { newT = moveOne(prevT, xMove); }
+    if( yMove ) { newT = moveOne(newT, yMove); }
+
+    return {
+        newT: newT,
+        directionsMoved: [xMove, yMove]
+    };
 };
 
 const partOne = (input: string[]) => {
@@ -150,7 +148,7 @@ const partOne = (input: string[]) => {
             // console.log(positionT);
             // update position H for this step
             positionH = moveOne(positionH, direction);
-            positionT = updateT(positionH, positionT, direction);
+            positionT = updateT(positionH, positionT, [direction]).newT;
             // store new position for T
             seenPoistionsOfT.add(coordinateAsString(positionT));
             // console.log("--- End of step ---");
@@ -165,17 +163,54 @@ const partOne = (input: string[]) => {
 };
 
 const partTwo = (input: string[]) => {
+    const numKnots = 10;
+    let knotPositions: Coordinate[] = [];
+    for(let k = 0; k < numKnots; k++) {
+        knotPositions.push({x: 0, y: 0});
+    }
 
-    // same as part 1 but go through chain of tails and only store on the last one
+    let seenPoistionsOfT = new Set<string>();
+    seenPoistionsOfT.add(coordinateAsString(knotPositions[numKnots-1]));
 
+    // for each row
+    input.map((instruction: string) => {
+        const parts = instruction.trim().split(' ');
+        const direction = parts[0];
+        const numSteps = parseInt(parts[1]);
+        
+        // for num steps, do step and check where T should be
+        for(let step = 1; step <= numSteps; step++) {
+            knotPositions[0] = moveOne(knotPositions[0], direction);
 
-    return "the answer to part two";
+            let lastDirections = [direction];
+            // for each knot, update its position based on the previous
+            // do I need to track all of them? possibly not, but it's easier
+            for(let k = 1; k < numKnots; k++) {
+                // need to work out which way the previous one moved for myself
+                const update = updateT(knotPositions[k-1], knotPositions[k], lastDirections);
+                knotPositions[k] = update.newT;
+                lastDirections = update.directionsMoved;
+            }
+            seenPoistionsOfT.add(coordinateAsString(knotPositions[numKnots-1]));
+        }
+    });
+
+    // console.log(seenPoistionsOfT);
+    return seenPoistionsOfT.size;
+};
+
+const printResult = (name: string, result: number, expected: number) => {    
+    console.log(name + " is " + result + (result===expected ? " CORRECT" : " INCORRECT"));
 };
 
 const testInput: string[] = readAndSplit("day9/testInput.txt");
-console.log("Test answer 1 is " + partOne(testInput));
-console.log("Test answer 2 is " + partTwo(testInput));
+printResult("Test answer 1 ", partOne(testInput), 13);
+printResult("Test answer 2 ", partTwo(testInput), 1);
+
+const largeTestInput: string[] = readAndSplit("day9/largeTestInput.txt");
+printResult("Large test answer 1 ", partOne(largeTestInput), 88); // not from AoC
+printResult("Large test answer 2 ", partTwo(largeTestInput), 36);
 
 const input: string[] = readAndSplit("day9/input.txt");
-console.log("Real answer 1 is " + partOne(input));
-console.log("Real answer 2 is " + partTwo(input));
+printResult("Read answer 1", partOne(input), 6642);
+console.log("Real answer 2 is " + partTwo(input)); //2765
